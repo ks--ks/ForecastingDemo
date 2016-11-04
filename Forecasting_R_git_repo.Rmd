@@ -1,0 +1,83 @@
+---
+title: "Forecasting modeling in R"
+author: "Olga Berezovsky"
+date: "10/24/2016"
+output: html_document
+params:
+  minimum: 
+    label: "Minimum:"
+    value: 100
+    input: slider
+    min: 0
+    max: 1000
+  region:
+    label: "Region:"
+    value: east
+    input: select
+    choices: [east, west, north, south]
+  data: 
+    label: "Input dataset:"
+    value: results.csv
+    input: file
+---
+
+# Forecasting modeling in R
+
+Building predictions is one of the most common tasks in data analytics. Below I am going to describe time series analysis and projection based on the chronological raw data. 
+
+**Dataset**: I’m going to use Google BigQuery public data — github_nested table 
+**The task**: project the amount of daily repositories in 2013 based on the 2010–2012 available data.
+
+-----------------------------------------
+
+## The process
+- Acquire data from Google BigQuery
+- Clean/transform data into numerical and date properties
+- Run *forecast*
+- Plot forecast results
+
+### Acquiring data set
+In order to connect to the Google BigQuery I am using  [bigQueryR](https://cran.r-project.org/web/packages/bigQueryR/vignettes/bigQueryR.html) package.
+
+```{r Acquiring dataset, echo=FALSE}
+
+library(bigQueryR)
+
+bqr_auth() #Authenticate to Google BigQuery
+
+dataset <- bqr_query("driven-strength-147321",
+                     "samples",
+                     "SELECT DATE(repository_created_at) as day,
+                      count(distinct(repository_url)) as cnt
+                      FROM [bigquery-public-data:samples.github_timeline]
+                      WHERE repository_created_at IS NOT NULL
+                      GROUP BY 1
+                      ORDER BY 1 asc")
+
+
+```
+### Cleaning/transforming data
+```{r Cleaning}
+head(dataset, 10)
+#In order to run a forecast we need to have 2 columns with date and intereger data types. Lets check what datatypes we have:
+class(dataset$day)
+dataset$day <- as.Date(dataset$day)
+class(dataset$day)
+class(dataset$cnt)
+#lets substract a dataframe for buiding a forecast
+head(dataset, 1440) -> dataset1
+tail(dataset1, 5)
+```
+
+```{r Forecasting}
+#I'm going to use exponential smoothing methods for a short-term forecasts 
+library(forecast)
+
+#fit_arima <- auto.arima(dataset$rolling_count)
+#f_arima <- forecast(fit_arima,h=24*14,level=80)
+
+```
+-----------------------
+
+### Prediction
+
