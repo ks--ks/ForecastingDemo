@@ -43,7 +43,8 @@ In order to connect to the Google BigQuery I am using  [bigQueryR](https://cran.
 
 library(bigQueryR)
 
-bqr_auth() #Authenticate to Google BigQuery
+#Authenticate to Google BigQuery
+bqr_auth()
 
 dataset <- bqr_query("driven-strength-147321",
                      "samples",
